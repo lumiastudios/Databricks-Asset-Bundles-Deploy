@@ -1,0 +1,109 @@
+name: 'Databricks Asset Bundles Deploy'
+description: 'Deploy Databricks asset bundles using the Databricks CLI'
+inputs:
+  working-directory:
+    description: 'The directory containing the Databricks asset bundle configuration'
+    required: true
+  databricks-host:
+    description: 'The Databricks workspace host URL'
+    required: true
+  databricks-bundle-env:
+    description: 'The target environment for the Databricks asset bundle deployment'
+    required: true
+  authentication-type:
+    description: 'The type of authentication to use (token or oauth)'
+    required: true
+    default: 'token'
+  databricks-token:
+    description: 'Databricks personal access token for authentication'
+    required: false
+  databricks-client-id:
+    description: 'Databricks OAuth client ID for authentication'
+    required: false
+  databricks-client-secret:
+    description: 'Databricks OAuth client secret for authentication'
+    required: false
+  arm-client-id:
+    description: 'Azure Managed Identity or Microsoft Entra ID client ID'
+    required: false
+  arm-client-secret:
+    description: 'Microsoft Entra ID client secret'
+    required: false
+  arm-tenant-id:
+    description: 'Microsoft Entra ID tenant ID'
+    required: false
+  google-credentials:
+    description: 'Google Cloud credentials for authentication'
+    required: false
+runs:
+  using: "composite"
+  steps:
+    - uses: databricks/setup-cli@main
+
+    - name: Validate Input Parameters
+      run: bash $GITHUB_ACTION_PATH/validate-parameters.sh
+      shell: bash
+      env:
+        AUTHENTICATION_TYPE: ${{ inputs.authentication-type }}
+        DATABRICKS_TOKEN: ${{ inputs.databricks-token }}
+        DATABRICKS_CLIENT_ID: ${{ inputs.databricks-client-id }}
+        DATABRICKS_CLIENT_SECRET: ${{ inputs.databricks-client-secret }}
+        ARM_CLIENT_ID: ${{ inputs.arm-client-id }}
+        ARM_CLIENT_SECRET: ${{ inputs.arm-client-secret }}
+        ARM_TENANT_ID: ${{ inputs.arm-tenant-id }}
+        GOOGLE_CREDENTIALS: ${{ inputs.google-credentials }}
+
+    - name: Deploy Databricks Asset Bundle
+      if: ${{ inputs.authentication-type == 'token' }}
+      run: databricks bundle deploy
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      env:
+        DATABRICKS_HOST: ${{ inputs.databricks-host }}
+        DATABRICKS_BUNDLE_ENV: ${{ inputs.databricks-bundle-env }}
+        DATABRICKS_TOKEN: ${{ inputs.databricks-token }}
+
+    - name: Deploy Databricks Asset Bundle
+      if: ${{ inputs.authentication-type == 'oauth' }}
+      run: databricks bundle deploy
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      env:
+        DATABRICKS_HOST: ${{ inputs.databricks-host }}
+        DATABRICKS_BUNDLE_ENV: ${{ inputs.databricks-bundle-env }}
+        DATABRICKS_CLIENT_ID: ${{ inputs.databricks-client-id }}
+        DATABRICKS_CLIENT_SECRET: ${{ inputs.databricks-client-secret }}
+
+    - name: Deploy Databricks Asset Bundle
+      if: ${{ inputs.authentication-type == 'azure-managed-identity' }}
+      run: databricks bundle deploy
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      env:
+        DATABRICKS_HOST: ${{ inputs.databricks-host }}
+        DATABRICKS_BUNDLE_ENV: ${{ inputs.databricks-bundle-env }}
+        ARM_CLIENT_ID: ${{ inputs.arm-client-id }}
+        ARM_USE_MSI: true
+
+    - name: Deploy Databricks Asset Bundle
+      if: ${{ inputs.authentication-type == 'microsoft-entra-id' }}
+      run: databricks bundle deploy
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      env:
+        DATABRICKS_HOST: ${{ inputs.databricks-host }}
+        DATABRICKS_BUNDLE_ENV: ${{ inputs.databricks-bundle-env }}
+        ARM_CLIENT_ID: ${{ inputs.arm-client-id }}
+        ARM_CLIENT_SECRET: ${{ inputs.arm-client-secret }}
+        ARM_TENANT_ID: ${{ inputs.arm-tenant-id }}
+        ARM_USE_MSI: false
+        
+    - name: Deploy Databricks Asset Bundle
+      if: ${{ inputs.authentication-type == 'google-credentials' }}
+      run: databricks bundle deploy
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      env:
+        DATABRICKS_HOST: ${{ inputs.databricks-host }}
+        DATABRICKS_BUNDLE_ENV: ${{ inputs.databricks-bundle-env }}
+        GOOGLE_CREDENTIALS: ${{ inputs.google-credentials }}
