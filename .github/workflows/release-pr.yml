@@ -1,0 +1,34 @@
+name: release-pr
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        type: string
+        required: true
+
+jobs:
+  release-pr:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Change to a new version
+        run: |
+          echo "${{ github.event.inputs.version }}" > VERSION
+
+      - name: Create a release pull request
+        uses: peter-evans/create-pull-request@v6.0.5
+        with:
+          author: "lumiastudios-bot <lumiastudios-bot@noreply.lumia.is>"
+          committer: "lumiastudios-bot <lumiastudios-bot@noreply.lumia.is>"
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: Release Databricks-Asset-Bundles-Deploy v${{ github.event.inputs.version }}
+          body: Release Databricks-Asset-Bundles-Deploy v${{ github.event.inputs.version }}
+          branch: release-v${{ github.event.inputs.version }}
+          title: 'Release Databricks-Asset-Bundles-Deploy v${{ github.event.inputs.version }}'
+          draft: false
