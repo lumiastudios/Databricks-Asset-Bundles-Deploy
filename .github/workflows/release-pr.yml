@@ -24,8 +24,8 @@ jobs:
       - name: Create a release pull request
         uses: peter-evans/create-pull-request@v6.0.5
         with:
-          author: "lumiastudios-bot <lumiastudios-bot@noreply.lumia.is>"
-          committer: "lumiastudios-bot <lumiastudios-bot@noreply.lumia.is>"
+          author: "lumiastudios-bot <lumiastudios-bot@lumia.is>"
+          committer: "lumiastudios-bot <lumiastudios-bot@lumia.is>"
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: Release Databricks-Asset-Bundles-Deploy v${{ github.event.inputs.version }}
           body: Release Databricks-Asset-Bundles-Deploy v${{ github.event.inputs.version }}
